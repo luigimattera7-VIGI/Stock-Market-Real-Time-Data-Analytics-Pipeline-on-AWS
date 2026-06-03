@@ -312,9 +312,20 @@ This project is licensed under the MIT License - see [LICENSE](LICENSE) file for
 
 ## Acknowledgments
 
+### Original Project
+- **Original Author**: [yeshwanthlm](https://github.com/yeshwanthlm)
+- **Original Repository**: [Stock-Market-Real-Time-Data-Analytics-Pipeline-on-AWS](https://github.com/yeshwanthlm/Stock-Market-Real-Time-Data-Analytics-Pipeline-on-AWS)
+- This project is built upon the excellent AWS serverless architecture foundation created by yeshwanthlm
+
+### Technologies & Libraries
 - Built with [yfinance](https://github.com/ranaroussi/yfinance) for real-time stock data
 - Serverless architecture using AWS services
 - Event-driven processing with Kinesis and Lambda
+
+### Additional Contributors
+- Enhanced with USDCLP price monitoring and email alert functionality
+- Improved documentation and deployment guides
+- Extended for real-world currency trading use cases
 
 ## Resources
 
@@ -336,6 +347,10 @@ For issues, questions, or suggestions:
 
 **Last Updated**: June 2026
 
-**Maintainer**: Luigi Mattera
+**Original Author**: [yeshwanthlm](https://github.com/yeshwanthlm)
 
-**Status**: Active Development
+**Current Maintainer**: Luigi Mattera
+
+**Status**: Active Development - Enhanced Fork with USDCLP Price Alerts
+
+**Note**: This is an enhanced version of the original project with added functionality for USD/CLP price target monitoring and email notifications.
