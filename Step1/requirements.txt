@@ -1,2 +1,4 @@
-boto3 
-yfinance
+boto3==1.28.85
+yfinance==0.2.32
+python-dateutil==2.8.2
+requests==2.31.0

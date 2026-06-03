@@ -1,76 +1,27 @@
 import boto3
-import json
-import decimal
-from datetime import datetime, timedelta
+import os
 
-# AWS Clients
-dynamodb = boto3.resource("dynamodb")
-sns = boto3.client("sns")
-
-# DynamoDB Table Name and SNS ARN
-TABLE_NAME = "stock-market-data"
-SNS_TOPIC_ARN = "<YOUR-SNS-TOPIC-ARN>"
-
-def get_recent_stock_data(symbol, minutes=5):
-    """ Fetch stock data for the last 'minutes' from DynamoDB using Query instead of Scan """
-    table = dynamodb.Table(TABLE_NAME)
-    now = datetime.utcnow()
-    past_time = now - timedelta(minutes=minutes)
-
-    try:
-        response = table.query(
-            KeyConditionExpression="symbol = :symbol AND #ts >= :time",
-            ExpressionAttributeNames={"#ts": "timestamp"},
-            ExpressionAttributeValues={
-                ":symbol": symbol,
-                ":time": past_time.strftime("%Y-%m-%d %H:%M:%S"),
-            },
-            ScanIndexForward=True  # Get latest records first
-        )
-        return sorted(response.get("Items", []), key=lambda x: x["timestamp"])
-    
-    except Exception as e:
-        print(f"Error fetching stock data: {e}")
-        return []
-
-def calculate_moving_average(data, period):
-    """ Calculate moving average for given period, avoid None issues """
-    if len(data) < period:
-        return decimal.Decimal("0") 
-    return sum(decimal.Decimal(d["price"]) for d in data[-period:]) / period
+sns = boto3.client('sns')
+# Asegúrate de que este ARN sea el correcto
+SNS_TOPIC_ARN = 'TU_SNS_TOPIC_ARN'  # Reemplaza con tu ARN real del SNS
+TARGET_PRICE = 850.0  # Cambia esto al precio objetivo que desees
 
 def lambda_handler(event, context):
-    """ Main Lambda function """
-    symbols = ["AAPL"]  # Add more stocks if needed
+    for record in event['Records']:
+        if record['eventName'] == 'INSERT':
+            new_image = record['dynamodb']['NewImage']
+            price = float(new_image['price']['N'])
+            symbol = new_image['symbol']['S']
+            
+            # --- Lógica de Precio Objetivo ---
+            if price <= TARGET_PRICE:
+                message = f"ALERTA DE PRECIO: {symbol} ha alcanzado el objetivo de {TARGET_PRICE}. Precio actual: {price}"
+                sns.publish(TopicArn=SNS_TOPIC_ARN, Message=message, Subject="Precio Objetivo Alcanzado")
 
-    for symbol in symbols:
-        stock_data = get_recent_stock_data(symbol)
-
-        if len(stock_data) < 20:  # Ensure we have enough data
-            continue
-
-        # Compute Moving Averages
-        sma_5 = calculate_moving_average(stock_data, 5)
-        sma_20 = calculate_moving_average(stock_data, 20)
-
-        # Get previous moving averages
-        sma_5_prev = calculate_moving_average(stock_data[:-1], 5)
-        sma_20_prev = calculate_moving_average(stock_data[:-1], 20)
-
-        if None not in (sma_5, sma_20, sma_5_prev, sma_20_prev):
-            message = None
-
-            # Detect Trend Change
-            if sma_5_prev < sma_20_prev and sma_5 > sma_20:
-                message = f"{symbol} is in an **Uptrend**! Consider a buy opportunity."
-            elif sma_5_prev > sma_20_prev and sma_5 < sma_20:
-                message = f"{symbol} is in a **Downtrend**! Consider selling."
-
-            # Publish SNS Alert
-            if message:
-                try:
-                    sns.publish(TopicArn=SNS_TOPIC_ARN, Message=message, Subject=f"Stock Alert: {symbol}")
-                except Exception as e:
-                    print(f"Failed to publish SNS message: {e}")
-
-    return {"statusCode": 200, "body": json.dumps("Trend analysis complete")}
+            # --- Lógica de Tendencias (Simulación simplificada) ---
+            # Nota: En un entorno real, aquí deberías consultar los últimos 20 registros
+            # de DynamoDB para calcular las SMA reales.
+            # Para esta prueba, si el precio sube bruscamente:
+            print(f"Procesando {symbol} a {price}")
+            
+    return {'statusCode': 200}
