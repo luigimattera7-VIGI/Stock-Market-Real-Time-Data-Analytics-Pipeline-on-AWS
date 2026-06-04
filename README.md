@@ -72,7 +72,7 @@ Stock-Market-Real-Time-Data-Analytics-Pipeline-on-AWS/
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/Stock-Market-Real-Time-Data-Analytics-Pipeline-on-AWS.git
+git clone https://github.com/luigimattera7-VIGI/Stock-Market-Real-Time-Data-Analytics-Pipeline-on-AWS.git
 cd Stock-Market-Real-Time-Data-Analytics-Pipeline-on-AWS
 
 # Install dependencies
